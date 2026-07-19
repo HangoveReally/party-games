@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f0e11" />
+  <title>Пати-игры</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'" />
+  <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap" /></noscript>
+  <link rel="stylesheet" href="css/style.css?v=1" />
+</head>
+<body>
+  <div id="app">
+
+    <!-- Главная -->
+    <section class="screen" id="screen-home">
+      <div class="wrap">
+        <h1 class="logo">Пати‑игры</h1>
+        <p class="tagline">Заходите с телефонов в одну комнату</p>
+
+        <label class="field">
+          <span>Твоё имя</span>
+          <input id="input-name" type="text" maxlength="16" placeholder="Например, Макс" autocomplete="off" />
+        </label>
+
+        <button class="btn btn-primary" id="btn-create">Создать комнату</button>
+
+        <div class="divider"><span>или</span></div>
+
+        <label class="field">
+          <span>Код комнаты</span>
+          <input id="input-code" type="text" maxlength="4" placeholder="ABCD" autocomplete="off" autocapitalize="characters" />
+        </label>
+        <button class="btn" id="btn-join">Войти</button>
+
+        <p class="hint error-text" id="home-error"></p>
+      </div>
+    </section>
+
+    <!-- Лобби -->
+    <section class="screen hidden" id="screen-lobby">
+      <div class="wrap">
+        <div class="code-box">
+          <span class="code-label">Код комнаты</span>
+          <div class="code-value" id="lobby-code">----</div>
+          <button class="btn btn-ghost btn-small" id="btn-copy">Скопировать</button>
+        </div>
+
+        <div class="players-head">
+          <span>Игроки</span>
+          <span class="players-count" id="lobby-count">0</span>
+        </div>
+        <ul class="players" id="lobby-players"></ul>
+
+        <div id="host-controls" class="hidden">
+          <div class="field">
+            <span>Игра</span>
+            <div class="segmented segmented-full" id="seg-game" role="group" aria-label="Игра">
+              <button type="button" class="seg-btn is-active" data-value="feud">100 к 1</button>
+              <button type="button" class="seg-btn" data-value="soon" disabled>Скоро…</button>
+            </div>
+          </div>
+          <label class="switch-row">
+            <span>Пак 18+ <small>(острые вопросы)</small></span>
+            <input type="checkbox" id="chk-hot" />
+          </label>
+          <button class="btn btn-primary" id="btn-start">Начать игру</button>
+          <p class="hint" id="lobby-hint"></p>
+        </div>
+        <p class="hint hidden" id="lobby-wait">Ждём, пока ведущий начнёт игру…</p>
+
+        <button class="btn btn-ghost js-leave">Выйти</button>
+      </div>
+    </section>
+
+    <!-- Игра: 100 к 1 -->
+    <section class="screen hidden" id="screen-feud">
+      <div class="wrap wrap-wide">
+        <div class="q-head">
+          <span class="q-pack" id="feud-pack"></span>
+          <h2 class="q-text" id="feud-q">—</h2>
+          <p class="q-hint" id="feud-hint"></p>
+        </div>
+
+        <ul class="board-feud" id="feud-board"></ul>
+
+        <div class="turn-line" id="feud-turn"></div>
+        <p class="feedback" id="feud-feedback"></p>
+
+        <div id="feud-input-area" class="hidden">
+          <label class="field">
+            <span>Твоя догадка</span>
+            <input id="feud-guess" type="text" maxlength="40" placeholder="Напиши ответ…" autocomplete="off" />
+          </label>
+          <div class="row-2">
+            <button class="btn btn-primary" id="btn-guess">Ответить</button>
+            <button class="btn btn-ghost" id="btn-pass">Пас</button>
+          </div>
+        </div>
+
+        <div id="feud-host" class="hidden host-strip">
+          <button class="btn btn-ghost btn-small" id="btn-hint">Подсказка</button>
+          <button class="btn btn-ghost btn-small hidden" id="btn-skip">Пропустить ход</button>
+          <button class="btn btn-ghost btn-small" id="btn-end-round">Завершить раунд</button>
+        </div>
+
+        <div class="board mini" id="feud-scores"></div>
+        <button class="btn btn-ghost js-leave">Выйти</button>
+      </div>
+    </section>
+
+    <!-- Итог раунда -->
+    <section class="screen hidden" id="screen-roundend">
+      <div class="wrap wrap-wide">
+        <h2 class="reveal-title">Табло раунда</h2>
+        <p class="q-text sm" id="re-q">—</p>
+        <ul class="board-feud revealed" id="re-board"></ul>
+
+        <div class="board" id="re-scores"></div>
+
+        <div id="re-host" class="hidden">
+          <button class="btn btn-primary" id="btn-next-round">Следующий раунд</button>
+          <button class="btn btn-ghost" id="btn-to-lobby">В лобби</button>
+        </div>
+        <p class="hint hidden" id="re-wait">Ждём ведущего…</p>
+
+        <button class="btn btn-ghost js-leave">Выйти</button>
+      </div>
+    </section>
+
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+  <script src="js/firebase-config.js?v=1"></script>
+  <script src="js/questions.js?v=1"></script>
+  <script src="js/app.js?v=1"></script>
+</body>
+</html>
