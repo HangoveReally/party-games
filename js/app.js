@@ -258,7 +258,7 @@ function renderFeud(room) {
       li.appendChild(txt); li.appendChild(pts);
     } else {
       txt.className = "slot-text closed";
-      txt.textContent = hintmask[i] ? hintmask[i].split("").join(" ") : "• • • • •";
+      txt.textContent = hintmask[i] ? hintmask[i].split("").join(" ") : "_ _ _ _ _";
       li.appendChild(txt);
     }
     board.appendChild(li);
@@ -459,7 +459,7 @@ function finishRound(room, revealed) {
 
 /* ---------- Подсказка: открыть случайную букву закрытых ответов ---------- */
 function revealable(ch) { return /[a-zа-яё]/i.test(ch); }
-function initialMask(t) { return t.split("").map((ch) => (revealable(ch) ? "•" : ch)).join(""); }
+function initialMask(t) { return t.split("").map((ch) => (revealable(ch) ? "_" : ch)).join(""); }
 function setChar(str, i, ch) { return str.substring(0, i) + ch + str.substring(i + 1); }
 
 function hostHintLetter() {
@@ -473,14 +473,14 @@ function hostHintLetter() {
     if (revealed[idx]) return;
     const mask = hintmask[idx] || initialMask(a.t);
     hintmask[idx] = mask;
-    for (let i = 0; i < a.t.length; i++) if (revealable(a.t[i]) && mask[i] === "•") slots.push({ idx, i });
+    for (let i = 0; i < a.t.length; i++) if (revealable(a.t[i]) && mask[i] === "_") slots.push({ idx, i });
   });
   if (!slots.length) return;
   const pick = slots[randInt(slots.length)];
   const t = secret.answers[pick.idx].t;
   const mask = setChar(hintmask[pick.idx], pick.i, t[pick.i]);
   let hidden = false;
-  for (let i = 0; i < t.length; i++) if (revealable(t[i]) && mask[i] === "•") { hidden = true; break; }
+  for (let i = 0; i < t.length; i++) if (revealable(t[i]) && mask[i] === "_") { hidden = true; break; }
 
   const updates = {};
   let merged = revealed;
