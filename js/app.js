@@ -316,17 +316,20 @@ function renderRoundEnd(room) {
 /* ---------- Табло счёта ---------- */
 function renderScores(room, elId, mini) {
   const players = room.players || {}, scores = room.scores || {};
-  const rows = Object.entries(players).map(([id, p]) => ({ id, name: p.name, score: scores[id] || 0 }))
+  const rows = Object.entries(players).map(([id, p]) => ({ id, name: p.name, score: scores[id] || 0, online: p.online !== false }))
     .sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
   const max = rows.length ? rows[0].score : 0;
   const el = $(elId); el.innerHTML = "";
   if (!mini) { const t = document.createElement("div"); t.className = "board-title"; t.textContent = "Счёт"; el.appendChild(t); }
   rows.forEach((r, i) => {
-    const row = document.createElement("div"); row.className = "board-row"; if (max > 0 && r.score === max) row.classList.add("lead");
+    const row = document.createElement("div"); row.className = "board-row";
+    if (max > 0 && r.score === max) row.classList.add("lead");
+    if (!r.online) row.classList.add("off");
     const left = document.createElement("div"); left.className = "b-name";
     const rank = document.createElement("span"); rank.className = "b-rank"; rank.textContent = i + 1;
     const name = document.createElement("span"); name.textContent = r.name + (r.id === myId ? " (ты)" : "");
     left.appendChild(rank); left.appendChild(name);
+    if (!r.online) { const off = document.createElement("span"); off.className = "b-off"; off.textContent = "не в сети"; left.appendChild(off); }
     const sc = document.createElement("span"); sc.className = "b-score"; sc.textContent = r.score;
     row.appendChild(left); row.appendChild(sc); el.appendChild(row);
   });
