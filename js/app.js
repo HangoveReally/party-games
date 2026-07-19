@@ -160,6 +160,7 @@ function leaveToHome() { detachRoom(); localStorage.removeItem(LS.room); showScr
 /* ---------- Рендер ---------- */
 function render(room) {
   currentRoom = room;
+  $("hango-count").textContent = room.hango || 0;
   isHost = room.host === myId;
   maybeTakeHost(room);
   if (isHost) processPending(room);   // хост разбирает ход текущего игрока
@@ -581,11 +582,9 @@ function bindUI() {
   $("btn-next-round").addEventListener("click", hostNextRound);
   $("btn-to-lobby").addEventListener("click", hostToLobby);
 
-  // Плавающая кнопка — личный счётчик нажатий (localStorage)
-  let hangoN = parseInt(localStorage.getItem("party_hango") || "0", 10) || 0;
-  $("hango-count").textContent = hangoN;
+  // Плавающая кнопка — общий счётчик комнаты (синхрон через Firebase, привязан к коду)
   $("hango-btn").addEventListener("click", () => {
-    hangoN++; localStorage.setItem("party_hango", hangoN); $("hango-count").textContent = hangoN;
+    if (roomRef) roomRef.child("hango").transaction((v) => (v || 0) + 1);
   });
 }
 
