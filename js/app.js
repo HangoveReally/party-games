@@ -236,11 +236,12 @@ function renderFeud(room) {
   const r = room.round || {};
   const players = room.players || {};
   $("feud-q").textContent = r.q || "";
-  const hintTxt = (r.hintLevel >= 2 && r.h2) ? "Подсказка: " + r.h2 : (r.h1 ? "Подсказка: " + r.h1 : "");
+  const hintTxt = r.h1 ? "Подсказка: " + r.h1 : "";
   const hintEl = $("feud-hint"); hintEl.textContent = hintTxt; hintEl.classList.toggle("hidden", !hintTxt);
 
-  // Табло: вскрытые ячейки + закрытые заглушки.
+  // Табло: вскрытые ячейки + закрытые (с маской открытых букв).
   const revealed = r.revealed || {};
+  const hintmask = r.hintmask || {};
   const board = $("feud-board"); board.innerHTML = "";
   for (let i = 0; i < (r.slots || 0); i++) {
     const li = document.createElement("li");
@@ -249,11 +250,15 @@ function renderFeud(room) {
     const txt = document.createElement("span"); txt.className = "slot-text";
     if (cell) {
       li.classList.add("open");
-      txt.innerHTML = escapeHtml(cell.t) + '<span class="slot-by">' + escapeHtml(cell.byName || "") + "</span>";
-      const pts = document.createElement("span"); pts.className = "slot-pts"; pts.textContent = cell.p;
+      const badge = cell.hinted
+        ? '<span class="slot-hint">подсказка</span>'
+        : (cell.byName ? '<span class="slot-by">' + escapeHtml(cell.byName) + "</span>" : "");
+      txt.innerHTML = escapeHtml(cell.t) + badge;
+      const pts = document.createElement("span"); pts.className = "slot-pts" + (cell.hinted ? " muted" : ""); pts.textContent = cell.p;
       li.appendChild(txt); li.appendChild(pts);
     } else {
-      txt.className = "slot-text closed"; txt.textContent = "• • • • •";
+      txt.className = "slot-text closed";
+      txt.textContent = hintmask[i] ? hintmask[i].split("").join(" ") : "• • • • •";
       li.appendChild(txt);
     }
     board.appendChild(li);
@@ -286,7 +291,6 @@ function renderFeud(room) {
   const hostStrip = $("feud-host");
   if (isHost) {
     hostStrip.classList.remove("hidden");
-    $("btn-hint").classList.toggle("hidden", r.hintLevel >= 2 || !r.h2);
     const turnOffline = turnP && turnP.online === false;
     $("btn-skip").classList.toggle("hidden", !turnOffline);
   } else hostStrip.classList.add("hidden");
@@ -301,11 +305,13 @@ function renderRoundEnd(room) {
   const board = $("re-board"); board.innerHTML = "";
   (r.board || []).forEach((cell, i) => {
     const li = document.createElement("li");
-    if (cell.by) li.classList.add("open"); else li.classList.add("miss-open");
+    if (cell.by || cell.hinted) li.classList.add("open"); else li.classList.add("miss-open");
     const num = document.createElement("span"); num.className = "slot-num"; num.textContent = i + 1; li.appendChild(num);
     const txt = document.createElement("span"); txt.className = "slot-text";
-    txt.innerHTML = escapeHtml(cell.t) + (cell.byName ? '<span class="slot-by">' + escapeHtml(cell.byName) + "</span>" : "");
-    const pts = document.createElement("span"); pts.className = "slot-pts"; pts.textContent = cell.p;
+    const badge = cell.hinted ? '<span class="slot-hint">подсказка</span>'
+      : (cell.byName ? '<span class="slot-by">' + escapeHtml(cell.byName) + "</span>" : "");
+    txt.innerHTML = escapeHtml(cell.t) + badge;
+    const pts = document.createElement("span"); pts.className = "slot-pts" + (cell.by ? "" : " muted"); pts.textContent = cell.p;
     li.appendChild(txt); li.appendChild(pts); board.appendChild(li);
   });
   renderScores(room, "re-scores", false);
@@ -393,6 +399,7 @@ function processPending(room) {
       revealed[idx] = { t: ans.t, p: ans.p, by: pend.pid, byName: pend.name };
       revealedSet.add(idx);
       updates["round/revealed/" + idx] = revealed[idx];
+      updates["round/hintmask/" + idx] = null;
       updates["scores/" + pend.pid] = (room.scores && room.scores[pend.pid] || 0) + ans.p;
       feedback = { name: pend.name, text: pend.text, res: "hit", pts: ans.p, ts: pend.ts };
     } else {
@@ -441,7 +448,8 @@ function finishRound(room, revealed) {
   if (secret && secret.roundId === r.roundId) {
     board = secret.answers.map((a, i) => {
       const cell = revealed[i];
-      return cell ? { t: a.t, p: a.p, by: cell.by, byName: cell.byName } : { t: a.t, p: a.p };
+      if (!cell) return { t: a.t, p: a.p };
+      return { t: a.t, p: a.p, by: cell.by || null, byName: cell.byName || null, hinted: !!cell.hinted };
     });
   } else {
     board = Object.keys(revealed).map((i) => revealed[i]); // фолбэк без секрета
@@ -449,7 +457,45 @@ function finishRound(room, revealed) {
   roomRef.update({ status: "roundend", "round/done": true, "round/board": board, "round/pending": null, updatedAt: ts() });
 }
 
-function hostRevealHint() { if (roomRef) roomRef.child("round/hintLevel").set(2); }
+/* ---------- Подсказка: открыть случайную букву закрытых ответов ---------- */
+function revealable(ch) { return /[a-zа-яё]/i.test(ch); }
+function initialMask(t) { return t.split("").map((ch) => (revealable(ch) ? "•" : ch)).join(""); }
+function setChar(str, i, ch) { return str.substring(0, i) + ch + str.substring(i + 1); }
+
+function hostHintLetter() {
+  if (!roomRef || !currentRoom) return;
+  const r = currentRoom.round; if (!r || r.done) return;
+  const secret = loadSecret(); if (!secret || secret.roundId !== r.roundId) return;
+  const revealed = r.revealed || {};
+  const hintmask = Object.assign({}, r.hintmask || {});
+  const slots = [];
+  secret.answers.forEach((a, idx) => {
+    if (revealed[idx]) return;
+    const mask = hintmask[idx] || initialMask(a.t);
+    hintmask[idx] = mask;
+    for (let i = 0; i < a.t.length; i++) if (revealable(a.t[i]) && mask[i] === "•") slots.push({ idx, i });
+  });
+  if (!slots.length) return;
+  const pick = slots[randInt(slots.length)];
+  const t = secret.answers[pick.idx].t;
+  const mask = setChar(hintmask[pick.idx], pick.i, t[pick.i]);
+  let hidden = false;
+  for (let i = 0; i < t.length; i++) if (revealable(t[i]) && mask[i] === "•") { hidden = true; break; }
+
+  const updates = {};
+  let merged = revealed;
+  if (hidden) {
+    updates["round/hintmask/" + pick.idx] = mask;
+  } else {
+    const ans = secret.answers[pick.idx];
+    updates["round/revealed/" + pick.idx] = { t: ans.t, p: ans.p, hinted: true };
+    updates["round/hintmask/" + pick.idx] = null;
+    merged = Object.assign({}, revealed); merged[pick.idx] = { t: ans.t, p: ans.p, hinted: true };
+  }
+  updates["updatedAt"] = ts();
+  roomRef.update(updates);
+  if (Object.keys(merged).length >= secret.answers.length) finishRound(currentRoom, merged);
+}
 function hostSkipTurn() {
   if (!roomRef || !currentRoom) return;
   const r = currentRoom.round; if (!r) return;
@@ -611,7 +657,7 @@ function bindUI() {
   $("btn-guess").addEventListener("click", submitGuess);
   $("feud-guess").addEventListener("keydown", (e) => { if (e.key === "Enter") submitGuess(); });
   $("btn-pass").addEventListener("click", passTurn);
-  $("btn-hint").addEventListener("click", hostRevealHint);
+  $("btn-hint").addEventListener("click", hostHintLetter);
   $("btn-skip").addEventListener("click", hostSkipTurn);
   $("btn-end-round").addEventListener("click", hostEndRound);
   $("btn-next-round").addEventListener("click", hostNextRound);

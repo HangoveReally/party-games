@@ -127,6 +127,9 @@ input::placeholder{color:var(--muted-2)}
 .slot-by{display:inline-block;vertical-align:middle;margin-left:8px;font-size:11px;font-weight:700;color:var(--accent-2);
   background:rgba(124,108,245,.14);border:1px solid rgba(124,108,245,.28);border-radius:6px;padding:2px 8px;letter-spacing:0}
 .board-feud.revealed li.miss-open{opacity:.55}
+.slot-hint{display:inline-block;vertical-align:middle;margin-left:8px;font-size:11px;font-weight:700;color:var(--muted-2);
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:6px;padding:2px 8px}
+.slot-pts.muted{color:var(--muted-2)}
 
 /* Блок хода: метка + инпут + кнопки вместе */
 .turn-block{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
