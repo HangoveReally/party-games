@@ -165,3 +165,26 @@ input::placeholder{color:var(--muted-2)}
 .hango-fab:active{transform:scale(.96)}
 .hango-label{white-space:nowrap}
 .hango-count{background:rgba(0,0,0,.28);border-radius:8px;min-width:26px;padding:2px 8px;text-align:center;font-size:14px;font-weight:800;font-variant-numeric:tabular-nums}
+
+/* Реакции (правый нижний угол) */
+.react-fab{position:fixed;right:14px;bottom:14px;z-index:50;width:48px;height:48px;
+  border-radius:14px;border:1px solid var(--line);background:linear-gradient(180deg,var(--card-2),var(--card));
+  color:#fff;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 8px 22px rgba(0,0,0,.4);transition:transform .1s,background .15s}
+.react-fab:hover{background:var(--card-2)}
+.react-fab:active{transform:scale(.94)}
+.react-menu{position:fixed;right:14px;bottom:72px;z-index:51;background:var(--card);border:1px solid var(--line);
+  border-radius:14px;padding:8px;display:grid;grid-template-columns:repeat(4,1fr);gap:4px;
+  box-shadow:0 14px 34px rgba(0,0,0,.5)}
+.react-emoji{width:40px;height:40px;border:none;background:transparent;border-radius:10px;font-size:23px;
+  cursor:pointer;transition:background .12s,transform .08s}
+.react-emoji:hover{background:var(--bg-soft)}
+.react-emoji:active{transform:scale(1.25)}
+
+#reaction-layer{position:fixed;inset:0;pointer-events:none;z-index:60;overflow:hidden}
+.reaction-pop{position:absolute;font-size:34px;will-change:transform,opacity;animation:floatUp 2.4s ease-out forwards}
+@keyframes floatUp{
+  0%{opacity:0;transform:translate(0,12px) scale(.6)}
+  15%{opacity:1;transform:translate(calc(var(--dx) * .2),-12px) scale(1.15)}
+  100%{opacity:0;transform:translate(var(--dx),-190px) scale(1)}
+}

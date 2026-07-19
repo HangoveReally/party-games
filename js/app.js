@@ -44,7 +44,7 @@ const myId = localStorage.getItem(LS.pid) || (function () { const id = uid(); lo
 let myName = localStorage.getItem(LS.name) || "";
 
 /* ---------- Состояние сессии ---------- */
-let roomRef = null, roomListener = null, connListener = null, heartbeat = null;
+let roomRef = null, roomListener = null, connListener = null, heartbeat = null, reactionListener = null;
 let currentCode = null, isHost = false, currentRoom = null;
 let allowHot = false, selectedGame = "feud";
 let hostSecret = null;           // { code, roundId, qid, answers:[{t,p,keys}] }
@@ -60,7 +60,10 @@ function ts() { return firebase.database.ServerValue.TIMESTAMP; }
 function showScreen(id) {
   document.querySelectorAll(".screen").forEach((s) => s.classList.add("hidden"));
   $(id).classList.remove("hidden");
-  const h = $("hango-btn"); if (h) h.classList.toggle("hidden", id === "screen-home");
+  const home = id === "screen-home";
+  const h = $("hango-btn"); if (h) h.classList.toggle("hidden", home);
+  const rf = $("react-fab"); if (rf) rf.classList.toggle("hidden", home);
+  if (home) { const rm = $("react-menu"); if (rm) rm.classList.add("hidden"); }
 }
 function saveSecret(s) { hostSecret = s; try { localStorage.setItem(LS.secret, JSON.stringify(s)); } catch (e) {} }
 function loadSecret() { if (hostSecret) return hostSecret; try { return JSON.parse(localStorage.getItem(LS.secret)); } catch (e) { return null; } }
@@ -148,12 +151,17 @@ function enterRoom(code, asHost) {
     if (!room) { leaveToHome(); return; }
     render(room);
   });
+  reactionListener = roomRef.child("reactions").on("child_added", (snap) => {
+    const r = snap.val();
+    if (r && r.e && Date.now() - (r.ts || 0) < 6000) spawnReaction(r.e);
+  });
 }
 function detachRoom() {
   if (roomRef && roomListener) roomRef.off("value", roomListener);
+  if (roomRef && reactionListener) roomRef.child("reactions").off("child_added", reactionListener);
   if (connListener) db.ref(".info/connected").off("value", connListener);
   if (heartbeat) clearInterval(heartbeat);
-  roomListener = connListener = roomRef = currentCode = null; isHost = false;
+  reactionListener = roomListener = connListener = roomRef = currentCode = null; isHost = false;
 }
 function leaveToHome() { detachRoom(); localStorage.removeItem(LS.room); showScreen("screen-home"); }
 
@@ -551,6 +559,24 @@ function tryResume() {
   });
 }
 
+/* ---------- Реакции (эфемерные, синхрон через /reactions) ---------- */
+function sendReaction(e) {
+  if (!roomRef || !e) return;
+  const ref = roomRef.child("reactions").push({ e, ts: Date.now() });
+  setTimeout(() => ref.remove(), 5000);
+}
+function spawnReaction(e) {
+  const layer = $("reaction-layer"); if (!layer) return;
+  const el = document.createElement("span");
+  el.className = "reaction-pop";
+  el.textContent = e;
+  el.style.right = (24 + Math.random() * 150) + "px";
+  el.style.bottom = (74 + Math.random() * 28) + "px";
+  el.style.setProperty("--dx", (Math.random() * 60 - 30) + "px");
+  layer.appendChild(el);
+  setTimeout(() => el.remove(), 2500);
+}
+
 /* ---------- UI ---------- */
 function bindUI() {
   $("input-name").value = myName;
@@ -585,6 +611,16 @@ function bindUI() {
   // Плавающая кнопка — общий счётчик комнаты (синхрон через Firebase, привязан к коду)
   $("hango-btn").addEventListener("click", () => {
     if (roomRef) roomRef.child("hango").transaction((v) => (v || 0) + 1);
+  });
+
+  // Реакции: меню в правом углу, эмодзи всплывают у всех
+  const reactFab = $("react-fab"), reactMenu = $("react-menu");
+  reactFab.addEventListener("click", (ev) => { ev.stopPropagation(); reactMenu.classList.toggle("hidden"); });
+  document.querySelectorAll("#react-menu .react-emoji").forEach((b) =>
+    b.addEventListener("click", () => sendReaction(b.textContent)));
+  document.addEventListener("click", (ev) => {
+    if (!reactMenu.classList.contains("hidden") && !reactMenu.contains(ev.target) && ev.target !== reactFab)
+      reactMenu.classList.add("hidden");
   });
 }
 

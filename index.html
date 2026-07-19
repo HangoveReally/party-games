@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'" />
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap" /></noscript>
-  <link rel="stylesheet" href="css/style.css?v=6" />
+  <link rel="stylesheet" href="css/style.css?v=7" />
 </head>
 <body>
   <div id="app">
@@ -134,13 +134,30 @@
       <span class="hango-count" id="hango-count">0</span>
     </button>
 
+    <button id="react-fab" class="react-fab hidden" type="button" aria-label="Реакции">😄</button>
+    <div id="react-menu" class="react-menu hidden">
+      <button class="react-emoji" type="button">😂</button>
+      <button class="react-emoji" type="button">💀</button>
+      <button class="react-emoji" type="button">🔥</button>
+      <button class="react-emoji" type="button">🗿</button>
+      <button class="react-emoji" type="button">👀</button>
+      <button class="react-emoji" type="button">🤡</button>
+      <button class="react-emoji" type="button">😎</button>
+      <button class="react-emoji" type="button">🥳</button>
+      <button class="react-emoji" type="button">👏</button>
+      <button class="react-emoji" type="button">❤️</button>
+      <button class="react-emoji" type="button">😮</button>
+      <button class="react-emoji" type="button">😭</button>
+    </div>
+    <div id="reaction-layer"></div>
+
   </div>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
-  <script src="js/firebase-config.js?v=6"></script>
-  <script src="js/questions.js?v=6"></script>
-  <script src="js/app.js?v=6"></script>
+  <script src="js/firebase-config.js?v=7"></script>
+  <script src="js/questions.js?v=7"></script>
+  <script src="js/app.js?v=7"></script>
 </body>
 </html>
