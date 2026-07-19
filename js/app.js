@@ -567,11 +567,18 @@ function sendReaction(e) {
 }
 function spawnReaction(e) {
   const layer = $("reaction-layer"); if (!layer) return;
+  // Якорь — видимое игровое поле (табло), иначе центр активного экрана.
+  let anchor = null;
+  if (!$("screen-feud").classList.contains("hidden")) anchor = $("feud-board");
+  else if (!$("screen-roundend").classList.contains("hidden")) anchor = $("re-board");
+  else anchor = document.querySelector(".screen:not(.hidden) .wrap");
+  let rect = anchor && anchor.getBoundingClientRect();
+  if (!rect || !rect.width) rect = { left: window.innerWidth / 2 - 120, width: 240, bottom: window.innerHeight * 0.6, height: 200 };
   const el = document.createElement("span");
   el.className = "reaction-pop";
   el.textContent = e;
-  el.style.right = (24 + Math.random() * 150) + "px";
-  el.style.bottom = (74 + Math.random() * 28) + "px";
+  el.style.left = (rect.left + 16 + Math.random() * Math.max(20, rect.width - 32)) + "px";
+  el.style.top = (rect.bottom - 24 - Math.random() * Math.min(140, rect.height * 0.5)) + "px";
   el.style.setProperty("--dx", (Math.random() * 60 - 30) + "px");
   layer.appendChild(el);
   setTimeout(() => el.remove(), 2500);
