@@ -57,7 +57,11 @@ function makeCode() { let c = ""; for (let i = 0; i < 4; i++) c += ALPHABET[Math
 function randInt(n) { return Math.floor(Math.random() * n); }
 function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = randInt(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; }
 function ts() { return firebase.database.ServerValue.TIMESTAMP; }
-function showScreen(id) { document.querySelectorAll(".screen").forEach((s) => s.classList.add("hidden")); $(id).classList.remove("hidden"); }
+function showScreen(id) {
+  document.querySelectorAll(".screen").forEach((s) => s.classList.add("hidden"));
+  $(id).classList.remove("hidden");
+  const h = $("hango-btn"); if (h) h.classList.toggle("hidden", id === "screen-home");
+}
 function saveSecret(s) { hostSecret = s; try { localStorage.setItem(LS.secret, JSON.stringify(s)); } catch (e) {} }
 function loadSecret() { if (hostSecret) return hostSecret; try { return JSON.parse(localStorage.getItem(LS.secret)); } catch (e) { return null; } }
 
@@ -576,6 +580,13 @@ function bindUI() {
   $("btn-end-round").addEventListener("click", hostEndRound);
   $("btn-next-round").addEventListener("click", hostNextRound);
   $("btn-to-lobby").addEventListener("click", hostToLobby);
+
+  // Плавающая кнопка — личный счётчик нажатий (localStorage)
+  let hangoN = parseInt(localStorage.getItem("party_hango") || "0", 10) || 0;
+  $("hango-count").textContent = hangoN;
+  $("hango-btn").addEventListener("click", () => {
+    hangoN++; localStorage.setItem("party_hango", hangoN); $("hango-count").textContent = hangoN;
+  });
 }
 
 bindUI();
