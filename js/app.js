@@ -235,9 +235,8 @@ function renderLobby(room) {
 function renderFeud(room) {
   const r = room.round || {};
   const players = room.players || {};
-  $("feud-pack").textContent = r.pack || "";
   $("feud-q").textContent = r.q || "";
-  const hintTxt = (r.hintLevel >= 2 && r.h2) ? "🔍 " + r.h2 : (r.h1 ? "💡 " + r.h1 : "");
+  const hintTxt = (r.hintLevel >= 2 && r.h2) ? "Подсказка: " + r.h2 : (r.h1 ? "Подсказка: " + r.h1 : "");
   const hintEl = $("feud-hint"); hintEl.textContent = hintTxt; hintEl.classList.toggle("hidden", !hintTxt);
 
   // Табло: вскрытые ячейки + закрытые заглушки.

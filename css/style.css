@@ -175,9 +175,9 @@ input::placeholder{color:var(--muted-2)}
 .react-fab:hover{background:var(--card-2)}
 .react-fab:active{transform:scale(.96)}
 .react-menu{position:fixed;right:14px;bottom:72px;z-index:51;background:var(--card);border:1px solid var(--line);
-  border-radius:14px;padding:8px;display:grid;grid-template-columns:repeat(4,1fr);gap:4px;
+  border-radius:14px;padding:8px;display:grid;grid-template-columns:repeat(6,1fr);gap:4px;
   box-shadow:0 14px 34px rgba(0,0,0,.5)}
-.react-emoji{width:40px;height:40px;border:none;background:transparent;border-radius:10px;font-size:23px;
+.react-emoji{width:38px;height:38px;border:none;background:transparent;border-radius:10px;font-size:21px;
   cursor:pointer;transition:background .12s,transform .08s}
 .react-emoji:hover{background:var(--bg-soft)}
 .react-emoji:active{transform:scale(1.25)}
