@@ -258,7 +258,14 @@ function renderFeud(room) {
       li.appendChild(txt); li.appendChild(pts);
     } else {
       txt.className = "slot-text closed";
-      txt.textContent = hintmask[i] ? hintmask[i].split("").join(" ") : "_ _ _ _ _";
+      const mask = hintmask[i] || "_____";
+      mask.split("").forEach((ch) => {
+        if (ch === " ") { txt.appendChild(document.createTextNode(" ")); return; }
+        const s = document.createElement("span");
+        s.className = ch === "_" ? "mch blank" : "mch";
+        s.textContent = ch;
+        txt.appendChild(s);
+      });
       li.appendChild(txt);
     }
     board.appendChild(li);
