@@ -98,6 +98,9 @@ input::placeholder{color:var(--muted-2)}
 .switch-row input:checked{background:var(--accent)}
 .switch-row input:checked::after{transform:translateX(18px)}
 
+/* Контейнеры-обёртки хоста: свой вертикальный ритм (иначе дети слипаются без отступов) */
+#host-controls,#re-host{display:flex;flex-direction:column;gap:var(--gap)}
+
 /* 100 к 1 */
 .q-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
   padding:16px 18px;text-align:center;display:flex;flex-direction:column;gap:6px}
