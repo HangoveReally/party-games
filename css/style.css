@@ -108,6 +108,8 @@ input::placeholder{color:var(--muted-2)}
 .q-text{font-size:21px;font-weight:700;line-height:1.25}
 .q-text.sm{font-size:17px}
 .q-hint{font-size:13px;color:var(--warn)}
+.attempts-line{font-size:13px;font-weight:600;color:var(--muted)}
+.attempts-line.low{color:var(--bad)}
 
 /* Панель ведущего — обрамлённая, с меткой, сразу под вопросом */
 .host-panel{display:flex;align-items:center;gap:10px;flex-wrap:wrap;

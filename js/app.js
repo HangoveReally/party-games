@@ -11,7 +11,7 @@
  *     players/{pid}: { name, online, joinedAt, lastSeen }
  *     scores/{pid}: <очки>
  *     round: {                       // партия 100 к 1
- *       roundId, qid, pack, q, h1, h2, slots, hintLevel,
+ *       roundId, qid, pack, q, h1, h2, slots, hintLevel, attempts,
  *       order:[pid...], turnIdx, turn,
  *       revealed: { "<i>": {t,p,by,byName} },   // вскрытые ячейки
  *       passes: { pid:true },
@@ -36,6 +36,7 @@ const ROOM_MAX_AGE = 5 * 60 * 60 * 1000; // 5 ч без активности
 const ROOM_EMPTY_AGE = 30 * 60 * 1000;   // 30 мин для пустой комнаты
 const RESUME_MAX_AGE = 3 * 60 * 60 * 1000;
 const MATCH_THRESHOLD = 3;
+const MAX_ATTEMPTS = 12;         // максимум догадок (попыток) на тему; пас не считается
 
 /* ---------- Идентичность ---------- */
 const LS = { pid: "party_pid", name: "party_name", room: "party_room", secret: "party_secret" };
@@ -239,6 +240,14 @@ function renderFeud(room) {
   const hintTxt = r.h1 ? "Подсказка: " + r.h1 : "";
   const hintEl = $("feud-hint"); hintEl.textContent = hintTxt; hintEl.classList.toggle("hidden", !hintTxt);
 
+  // Счётчик попыток на тему.
+  const usedAtt = r.attempts || 0, leftAtt = Math.max(0, MAX_ATTEMPTS - usedAtt);
+  const attEl = $("feud-attempts");
+  if (attEl) {
+    attEl.textContent = "Осталось попыток: " + leftAtt + " / " + MAX_ATTEMPTS;
+    attEl.classList.toggle("low", leftAtt <= 3);
+  }
+
   // Табло: вскрытые ячейки + закрытые (с маской открытых букв).
   const revealed = r.revealed || {};
   const hintmask = r.hintmask || {};
@@ -378,7 +387,7 @@ function startRound() {
     lastQid: q.id,
     round: {
       roundId, qid: q.id, pack: q.pack, q: q.q, h1: q.h1 || "", h2: q.h2 || "",
-      slots: answers.length, hintLevel: 1,
+      slots: answers.length, hintLevel: 1, attempts: 0,
       order, turnIdx: 0, turn: order[0],
       revealed: {}, passes: {}, pending: null, feedback: null, done: false,
     },
@@ -417,12 +426,17 @@ function processPending(room) {
     feedback = { name: pend.name, text: "пас", res: "miss", pts: 0, ts: pend.ts };
   }
 
+  // Попытка засчитывается только за реальную догадку (не пас).
+  const attempts = (r.attempts || 0) + (pend.pass ? 0 : 1);
+  updates["round/attempts"] = attempts;
   updates["round/pending"] = null;
   updates["round/feedback"] = feedback;
   updates["updatedAt"] = ts();
 
   // Все ячейки вскрыты — раунд завершён.
   if (revealedSet.size >= secret.answers.length) { finishRound(room, revealed); return; }
+  // Исчерпан лимит попыток на тему — завершаем, вскрываем табло.
+  if (attempts >= MAX_ATTEMPTS) { roomRef.update(updates); finishRound(room, revealed); return; }
 
   // Следующий ход (пропуская офлайн и спасовавших).
   const passes = Object.assign({}, r.passes || {});
