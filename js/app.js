@@ -26,8 +26,9 @@
 
 /* ---------- Firebase ---------- */
 let db = null;
+let initError = "";
 try { firebase.initializeApp(firebaseConfig); db = firebase.database(); }
-catch (e) { alert("Firebase не настроен — проверь js/firebase-config.js."); }
+catch (e) { initError = "Firebase не настроен, проверь js/firebase-config.js."; }
 
 const ROOT = "party";
 const HOST_TIMEOUT = 15 * 60 * 1000;     // 15 мин — потом передаём ведущего
@@ -222,8 +223,9 @@ function renderFeud(room) {
   const r = room.round || {};
   const players = room.players || {};
   $("feud-pack").textContent = r.pack || "";
-  $("feud-q").textContent = r.q || "—";
-  $("feud-hint").textContent = (r.hintLevel >= 2 && r.h2) ? "🔍 " + r.h2 : (r.h1 ? "💡 " + r.h1 : "");
+  $("feud-q").textContent = r.q || "";
+  const hintTxt = (r.hintLevel >= 2 && r.h2) ? "🔍 " + r.h2 : (r.h1 ? "💡 " + r.h1 : "");
+  const hintEl = $("feud-hint"); hintEl.textContent = hintTxt; hintEl.classList.toggle("hidden", !hintTxt);
 
   // Табло: вскрытые ячейки + закрытые заглушки.
   const revealed = r.revealed || {};
@@ -248,20 +250,24 @@ function renderFeud(room) {
   // Чей ход + поле ввода.
   const turnP = players[r.turn];
   const myTurn = r.turn === myId && turnP && turnP.online !== false;
-  const turnEl = $("feud-turn"); turnEl.classList.toggle("you", r.turn === myId);
-  if (r.turn === myId) turnEl.innerHTML = "Твой ход — пиши ответ";
-  else turnEl.innerHTML = "Ход: <b>" + escapeHtml(turnP ? turnP.name : "…") + "</b>" + (turnP && turnP.online === false ? " (не в сети)" : "");
-
   $("feud-input-area").classList.toggle("hidden", !myTurn);
-  if (myTurn) { const g = $("feud-guess"); if (document.activeElement !== g) g.value = ""; }
+  const waitEl = $("feud-turn-wait");
+  if (myTurn) {
+    $("feud-turn").textContent = "Твой ход";
+    waitEl.classList.add("hidden");
+    const g = $("feud-guess"); if (document.activeElement !== g) g.value = "";
+  } else {
+    waitEl.classList.remove("hidden");
+    waitEl.innerHTML = "Ходит <b>" + escapeHtml(turnP ? turnP.name : "") + "</b>" + (turnP && turnP.online === false ? " (не в сети)" : "");
+  }
 
   // Фидбек по последнему ходу.
   const fb = r.feedback, fbEl = $("feud-feedback");
   if (fb) {
     fbEl.className = "feedback " + (fb.res === "hit" ? "hit" : "miss");
     fbEl.textContent = fb.res === "hit"
-      ? fb.name + ": «" + fb.text + "» — в точку! +" + fb.pts
-      : fb.name + ": «" + fb.text + "» — мимо";
+      ? fb.name + ": «" + fb.text + "» +" + fb.pts
+      : fb.name + ": «" + fb.text + "» мимо";
   } else { fbEl.textContent = ""; fbEl.className = "feedback"; }
 
   // Панель ведущего.
@@ -279,7 +285,7 @@ function renderFeud(room) {
 /* ---------- Итог раунда ---------- */
 function renderRoundEnd(room) {
   const r = room.round || {};
-  $("re-q").textContent = r.q || "—";
+  $("re-q").textContent = r.q || "";
   const board = $("re-board"); board.innerHTML = "";
   (r.board || []).forEach((cell, i) => {
     const li = document.createElement("li");
@@ -543,6 +549,7 @@ function tryResume() {
 /* ---------- UI ---------- */
 function bindUI() {
   $("input-name").value = myName;
+  if (initError) homeError(initError);
   $("input-name").addEventListener("input", (e) => { myName = e.target.value.trim(); localStorage.setItem(LS.name, e.target.value); });
   $("btn-create").addEventListener("click", createGame);
   $("btn-join").addEventListener("click", joinGame);

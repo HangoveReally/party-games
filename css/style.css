@@ -99,35 +99,45 @@ input::placeholder{color:var(--muted-2)}
 .switch-row input:checked::after{transform:translateX(18px)}
 
 /* 100 к 1 */
-.q-head{text-align:center;display:flex;flex-direction:column;gap:6px}
+.q-card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:16px 18px;text-align:center;display:flex;flex-direction:column;gap:6px}
 .q-pack{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted-2)}
-.q-text{font-size:22px;font-weight:700;line-height:1.25}
-.q-text.sm{font-size:18px}
+.q-text{font-size:21px;font-weight:700;line-height:1.25}
+.q-text.sm{font-size:17px}
 .q-hint{font-size:13px;color:var(--warn)}
 
-.board-feud{list-style:none;display:flex;flex-direction:column;gap:8px}
+/* Панель ведущего — обрамлённая, с меткой, сразу под вопросом */
+.host-panel{display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  background:var(--bg-soft);border:1px solid var(--line);border-radius:var(--r-sm);padding:8px 10px 8px 12px}
+.panel-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted-2);flex:none}
+.host-btns{display:flex;gap:6px;flex-wrap:wrap;margin-left:auto}
+
+.board-feud{list-style:none;display:flex;flex-direction:column;gap:6px}
 .board-feud li{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);
-  border-radius:var(--r-sm);padding:13px 14px;min-height:50px}
-.slot-num{width:24px;height:24px;border-radius:6px;background:var(--bg-soft);color:var(--muted-2);
-  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex:none}
-.slot-text{flex:1;font-weight:600}
-.slot-text.closed{color:var(--muted-2);font-weight:500;letter-spacing:.15em}
+  border-radius:var(--r-sm);padding:8px 14px;min-height:48px}
+.slot-num{width:22px;height:22px;border-radius:6px;background:var(--bg-soft);color:var(--muted-2);
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex:none}
+.slot-text{flex:1;font-weight:600;line-height:1.2}
+.slot-text.closed{color:var(--muted-2);font-weight:500;letter-spacing:.2em}
 .slot-pts{font-weight:800;color:var(--accent-2);font-size:17px}
 .board-feud li.open{border-color:rgba(124,108,245,.4);background:linear-gradient(180deg,rgba(124,108,245,.10),var(--card))}
-.slot-by{font-size:11px;color:var(--muted-2);display:block;font-weight:500;letter-spacing:0}
-.board-feud.revealed li.miss-open{opacity:.6}
+.slot-by{font-size:11px;color:var(--muted-2);display:block;font-weight:500;letter-spacing:0;margin-top:1px}
+.board-feud.revealed li.miss-open{opacity:.55}
 
-.turn-line{text-align:center;font-size:15px;color:var(--muted);min-height:1.2em}
+/* Блок хода: метка + инпут + кнопки вместе */
+.turn-block{background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:14px;display:flex;flex-direction:column;gap:10px}
+.turn-block .turn-line{color:var(--accent-2);font-weight:700;font-size:15px}
+.turn-line{font-size:14px;color:var(--muted)}
 .turn-line b{color:var(--text)}
-.turn-line.you{color:var(--accent-2)}
-.feedback{text-align:center;font-size:14px;min-height:1.2em;font-weight:600}
+.turn-line.waiting{text-align:center;padding:2px 0}
+.feedback{text-align:center;font-size:14px;font-weight:600;min-height:1.1em}
 .feedback.hit{color:var(--good)}
 .feedback.miss{color:var(--bad)}
 
 .row-2{display:flex;gap:10px}
 .row-2 .btn{flex:1}
-.row-2 .btn-ghost{flex:0 0 90px}
-.host-strip{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+.row-2 .btn-ghost{flex:0 0 88px}
 
 /* Табло счёта */
 .board{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:4px}

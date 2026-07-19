@@ -9,7 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'" />
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap" /></noscript>
-  <link rel="stylesheet" href="css/style.css?v=1" />
+  <link rel="stylesheet" href="css/style.css?v=2" />
 </head>
 <body>
   <div id="app">
@@ -18,7 +18,6 @@
     <section class="screen" id="screen-home">
       <div class="wrap">
         <h1 class="logo">Пати‑игры</h1>
-        <p class="tagline">Заходите с телефонов в одну комнату</p>
 
         <label class="field">
           <span>Твоё имя</span>
@@ -63,7 +62,7 @@
             </div>
           </div>
           <label class="switch-row">
-            <span>Пак 18+ <small>(острые вопросы)</small></span>
+            <span>Острые вопросы 18+</span>
             <input type="checkbox" id="chk-hot" />
           </label>
           <button class="btn btn-primary" id="btn-start">Начать игру</button>
@@ -78,33 +77,33 @@
     <!-- Игра: 100 к 1 -->
     <section class="screen hidden" id="screen-feud">
       <div class="wrap wrap-wide">
-        <div class="q-head">
+        <div class="q-card">
           <span class="q-pack" id="feud-pack"></span>
-          <h2 class="q-text" id="feud-q">—</h2>
-          <p class="q-hint" id="feud-hint"></p>
+          <h2 class="q-text" id="feud-q"></h2>
+          <p class="q-hint hidden" id="feud-hint"></p>
+        </div>
+
+        <div id="feud-host" class="hidden host-panel">
+          <span class="panel-label">Ведущий</span>
+          <div class="host-btns">
+            <button class="btn btn-ghost btn-small" id="btn-hint">Показать подсказку</button>
+            <button class="btn btn-ghost btn-small hidden" id="btn-skip">Пропустить ход</button>
+            <button class="btn btn-ghost btn-small" id="btn-end-round">Завершить раунд</button>
+          </div>
         </div>
 
         <ul class="board-feud" id="feud-board"></ul>
 
-        <div class="turn-line" id="feud-turn"></div>
-        <p class="feedback" id="feud-feedback"></p>
-
-        <div id="feud-input-area" class="hidden">
-          <label class="field">
-            <span>Твоя догадка</span>
-            <input id="feud-guess" type="text" maxlength="40" placeholder="Напиши ответ…" autocomplete="off" />
-          </label>
+        <div id="feud-input-area" class="turn-block hidden">
+          <div class="turn-line" id="feud-turn"></div>
+          <input id="feud-guess" type="text" maxlength="40" placeholder="Напиши ответ" autocomplete="off" />
           <div class="row-2">
             <button class="btn btn-primary" id="btn-guess">Ответить</button>
             <button class="btn btn-ghost" id="btn-pass">Пас</button>
           </div>
         </div>
-
-        <div id="feud-host" class="hidden host-strip">
-          <button class="btn btn-ghost btn-small" id="btn-hint">Подсказка</button>
-          <button class="btn btn-ghost btn-small hidden" id="btn-skip">Пропустить ход</button>
-          <button class="btn btn-ghost btn-small" id="btn-end-round">Завершить раунд</button>
-        </div>
+        <div class="turn-line waiting" id="feud-turn-wait"></div>
+        <p class="feedback" id="feud-feedback"></p>
 
         <div class="board mini" id="feud-scores"></div>
         <button class="btn btn-ghost js-leave">Выйти</button>
@@ -135,8 +134,8 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 
-  <script src="js/firebase-config.js?v=1"></script>
-  <script src="js/questions.js?v=1"></script>
-  <script src="js/app.js?v=1"></script>
+  <script src="js/firebase-config.js?v=2"></script>
+  <script src="js/questions.js?v=2"></script>
+  <script src="js/app.js?v=2"></script>
 </body>
 </html>
